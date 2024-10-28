@@ -1,0 +1,23 @@
+apiVersion: eso.externalsecrets.com/v1
+kind: AsyncRotator
+metadata:
+  name: gcp-sample
+  labels:
+    app.kubernetes.io/name: asyncrotator
+spec:
+  notificationSources:
+    - type: GooglePubSub
+      googlePubSub:
+        subscriptionID: ${subscription_id}
+        projectID: ${project_id}
+        auth:
+        # If using service account keys
+          secretRef:
+            secretAccessKeySecretRef:
+              name: ${secret_name}
+              namespace: ${secret_namespace}
+              key: ${secret_key}
+  secretsToWatch:
+    - labelSelectors:
+        matchLabels:
+          externalsecrets.com/rotate: "true"
