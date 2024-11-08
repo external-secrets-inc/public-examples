@@ -7,3 +7,5 @@ variable "subscription_id" {}
 variable "create_subscription" {
   default = false
 }
+
+variable "forwarding_url" {}

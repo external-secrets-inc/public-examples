@@ -16,16 +16,3 @@ spec:
   secretsToWatch:
     - names:
         - asyncrotatordemo-es
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: eventgrid-rotator-service
-  namespace: async-rotator-system
-spec:
-  selector:
-    app: eventgrid-rotator
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 8000
