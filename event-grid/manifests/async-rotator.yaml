@@ -1,0 +1,18 @@
+apiVersion: eso.externalsecrets.com/v1
+kind: AsyncRotator
+metadata:
+  name: eventgrid-rotator
+  namespace: async-rotator-system
+  labels:
+    app: eventgrid-rotator
+spec:
+  notificationSources:
+    - type: AzureEventGrid
+      azureEventGrid:
+        host: localhost
+        port: 8000
+        subscriptions:
+          - asyncrotatordemo-egsub
+  secretsToWatch:
+    - names:
+        - asyncrotatordemo-es
