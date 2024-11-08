@@ -5,4 +5,5 @@ public examples for external-secrets-inc products
 
 ### Async Rotator
 
-* [Set up GCP PubSub](./async-rotator/pub-sub/terraform/README.md)
+* [Set up GCP PubSub](./pub-sub/terraform/README.md)
+* [Set up Azure Event Grid](./event-grid/README.md)
