@@ -1,18 +1,3 @@
-
-variable "trail_name" {
-  type    = string
-  default = "trail-for-events"
-}
-
-variable "region" {
-  type    = string
-  default = "us-east-1"
-}
-
-variable "account_id" {
-  type    = string
-}
-
 # Create an SQS queue
 resource "aws_sqs_queue" "secrets_manager_events_queue" {
   name = "secrets-manager-events-queue"
@@ -21,7 +6,7 @@ resource "aws_sqs_queue" "secrets_manager_events_queue" {
 # Create a KMS key
 resource "aws_kms_key" "key" {
   description = "KMS key for Cloud Trail"
-  policy = <<EOT
+  policy      = <<EOT
         {
             "Version": "2012-10-17",
             "Id": "Key policy created by CloudTrail",
@@ -127,10 +112,11 @@ resource "aws_kms_key" "key" {
 resource "random_string" "suffix" {
   length  = 8
   special = false
-  upper = false
+  upper   = false
 }
+
 resource "aws_s3_bucket" "cloudtrail" {
-  bucket = "aws-cloudtrail-logs-${var.account_id}-${random_string.suffix.result}"
+  bucket        = "aws-cloudtrail-logs-${var.account_id}-${random_string.suffix.result}"
   force_destroy = true
 }
 
@@ -173,38 +159,39 @@ resource "aws_s3_bucket_policy" "cloudtrail" {
 }
 POLICY
 }
+
 resource "aws_cloudtrail" "secrets_manager_trail" {
-  name                          = "${var.trail_name}"
+  name                          = var.trail_name
   s3_bucket_name                = aws_s3_bucket.cloudtrail.id
-  kms_key_id = aws_kms_key.key.arn
+  kms_key_id                    = aws_kms_key.key.arn
   include_global_service_events = true
   is_multi_region_trail         = true
   enable_log_file_validation    = true
-       advanced_event_selector {
-          name = "Management events selector"
-          field_selector {
-              equals          = [
-                  "Management",
-                ]
-              field           = "eventCategory"
-            }
-        } 
-  depends_on = [ aws_s3_bucket_policy.cloudtrail ]
+  advanced_event_selector {
+    name = "Management events selector"
+    field_selector {
+      equals = [
+        "Management",
+      ]
+      field = "eventCategory"
+    }
+  }
+  depends_on = [aws_s3_bucket_policy.cloudtrail]
 }
 
 data "aws_iam_policy_document" "policy" {
   statement {
     actions   = ["sqs:SendMessage"]
     resources = [aws_sqs_queue.secrets_manager_events_queue.arn]
-    sid = "AllowEventBridgeToSendMessages"
+    sid       = "AllowEventBridgeToSendMessages"
     principals {
       type        = "Service"
       identifiers = ["events.amazonaws.com"]
     }
     condition {
-      test = "ArnEquals"
+      test     = "ArnEquals"
       variable = "aws:SourceArn"
-      values = [aws_cloudwatch_event_rule.secrets_manager_events_rule.arn]
+      values   = [aws_cloudwatch_event_rule.secrets_manager_events_rule.arn]
     }
     effect = "Allow"
   }
@@ -226,7 +213,6 @@ resource "aws_cloudwatch_event_rule" "secrets_manager_events_rule" {
   ## For GetSecretValue Logging, uncomment below
   # state = "ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS"
 }
-
 
 # Create an EventBridge target to send events to the SQS queue
 resource "aws_cloudwatch_event_target" "secrets_manager_events_target" {
