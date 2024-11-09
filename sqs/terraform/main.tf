@@ -16,8 +16,8 @@ resource "aws_kms_key" "key" {
                     "Effect": "Allow",
                     "Principal": {
                         "AWS": [
-                            "arn:aws:iam::${var.account_id}:user/gustavo_carvalho",
-                            "arn:aws:iam::${var.account_id}:root"
+                            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/gustavo_carvalho",
+                            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
                         ]
                     },
                     "Action": "kms:*",
@@ -33,10 +33,10 @@ resource "aws_kms_key" "key" {
                     "Resource": "*",
                     "Condition": {
                         "StringEquals": {
-                            "aws:SourceArn": "arn:aws:cloudtrail:${var.region}:${var.account_id}:trail/${var.trail_name}"
+                            "aws:SourceArn": "arn:aws:cloudtrail:${var.region}:${data.aws_caller_identity.current.account_id}:trail/${var.trail_name}"
                         },
                         "StringLike": {
-                            "kms:EncryptionContext:aws:cloudtrail:arn": "arn:aws:cloudtrail:*:${var.account_id}:trail/*"
+                            "kms:EncryptionContext:aws:cloudtrail:arn": "arn:aws:cloudtrail:*:${data.aws_caller_identity.current.account_id}:trail/*"
                         }
                     }
                 },
@@ -62,10 +62,10 @@ resource "aws_kms_key" "key" {
                     "Resource": "*",
                     "Condition": {
                         "StringEquals": {
-                            "kms:CallerAccount": "${var.account_id}"
+                            "kms:CallerAccount": "${data.aws_caller_identity.current.account_id}"
                         },
                         "StringLike": {
-                            "kms:EncryptionContext:aws:cloudtrail:arn": "arn:aws:cloudtrail:*:${var.account_id}:trail/*"
+                            "kms:EncryptionContext:aws:cloudtrail:arn": "arn:aws:cloudtrail:*:${data.aws_caller_identity.current.account_id}:trail/*"
                         }
                     }
                 },
@@ -80,7 +80,7 @@ resource "aws_kms_key" "key" {
                     "Condition": {
                         "StringEquals": {
                             "kms:ViaService": "ec2.${var.region}.amazonaws.com",
-                            "kms:CallerAccount": "${var.account_id}"
+                            "kms:CallerAccount": "${data.aws_caller_identity.current.account_id}"
                         }
                     }
                 },
@@ -97,10 +97,10 @@ resource "aws_kms_key" "key" {
                     "Resource": "*",
                     "Condition": {
                         "StringEquals": {
-                            "kms:CallerAccount": "${var.account_id}"
+                            "kms:CallerAccount": "${data.aws_caller_identity.current.account_id}"
                         },
                         "StringLike": {
-                            "kms:EncryptionContext:aws:cloudtrail:arn": "arn:aws:cloudtrail:*:${var.account_id}:trail/*"
+                            "kms:EncryptionContext:aws:cloudtrail:arn": "arn:aws:cloudtrail:*:${data.aws_caller_identity.current.account_id}:trail/*"
                         }
                     }
                 }
@@ -116,7 +116,7 @@ resource "random_string" "suffix" {
 }
 
 resource "aws_s3_bucket" "cloudtrail" {
-  bucket        = "aws-cloudtrail-logs-${var.account_id}-${random_string.suffix.result}"
+  bucket        = "aws-cloudtrail-logs-${data.aws_caller_identity.current.account_id}-${random_string.suffix.result}"
   force_destroy = true
 }
 
@@ -136,7 +136,7 @@ resource "aws_s3_bucket_policy" "cloudtrail" {
             "Resource": "${aws_s3_bucket.cloudtrail.arn}",
             "Condition": {
                 "StringEquals": {
-                    "AWS:SourceArn": "arn:aws:cloudtrail:${var.region}:${var.account_id}:trail/${var.trail_name}"
+                    "AWS:SourceArn": "arn:aws:cloudtrail:${var.region}:${data.aws_caller_identity.current.account_id}:trail/${var.trail_name}"
                 }
             }
         },
@@ -147,11 +147,11 @@ resource "aws_s3_bucket_policy" "cloudtrail" {
                 "Service": "cloudtrail.amazonaws.com"
             },
             "Action": "s3:PutObject",
-            "Resource": "${aws_s3_bucket.cloudtrail.arn}/AWSLogs/${var.account_id}/*",
+            "Resource": "${aws_s3_bucket.cloudtrail.arn}/AWSLogs/${data.aws_caller_identity.current.account_id}/*",
             "Condition": {
                 "StringEquals": {
                     "s3:x-amz-acl": "bucket-owner-full-control",
-                    "AWS:SourceArn": "arn:aws:cloudtrail:${var.region}:${var.account_id}:trail/${var.trail_name}"
+                    "AWS:SourceArn": "arn:aws:cloudtrail:${var.region}:${data.aws_caller_identity.current.account_id}:trail/${var.trail_name}"
                 }
             }
         }

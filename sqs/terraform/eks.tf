@@ -1,5 +1,3 @@
-data "aws_caller_identity" "current" {}
-
 module "async-rotator-cluster" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 20.0"
