@@ -9,7 +9,7 @@ data "aws_iam_policy_document" "secrets_officer_assume_role_policy" {
 
     condition {
       test     = "StringEquals"
-      variable = "${module.async-rotator-cluster.cluster_oidc_issuer_url}:sub"
+      variable = "${replace(module.async-rotator-cluster.cluster_oidc_issuer_url, "https://", "")}:sub"
       values   = ["system:serviceaccount:default:secretsofficer"]
     }
   }
@@ -29,5 +29,15 @@ data "aws_iam_policy_document" "secrets_officer_policy_document" {
   statement {
     actions   = ["kms:Decrypt", "secretsmanager:GetSecretValue"]
     resources = ["*"]
+  }
+}
+
+resource "kubernetes_service_account" "secrets_officer" {
+  metadata {
+    name      = "secretsofficer"
+    namespace = "default"
+    annotations = {
+      "eks.amazonaws.com/role-arn" = aws_iam_role.secrets_officer.arn
+    }
   }
 }
