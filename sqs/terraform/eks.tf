@@ -1,4 +1,4 @@
-module "async-rotator-cluster" {
+module "async_rotator_cluster" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 20.0"
 

@@ -4,19 +4,19 @@ data "aws_iam_policy_document" "secrets_officer_assume_role_policy" {
 
     principals {
       type        = "Federated"
-      identifiers = [module.async-rotator-cluster.oidc_provider_arn]
+      identifiers = [module.async_rotator_cluster.oidc_provider_arn]
     }
 
     condition {
       test     = "StringEquals"
-      variable = "${replace(module.async-rotator-cluster.cluster_oidc_issuer_url, "https://", "")}:sub"
+      variable = "${replace(module.async_rotator_cluster.cluster_oidc_issuer_url, "https://", "")}:sub"
       values   = ["system:serviceaccount:default:secretsofficer"]
     }
   }
 }
 
 resource "aws_iam_role" "secrets_officer" {
-  name               = "${module.async-rotator-cluster.cluster_name}-secrets-officer"
+  name               = "${module.async_rotator_cluster.cluster_name}-secrets-officer"
   assume_role_policy = data.aws_iam_policy_document.secrets_officer_assume_role_policy.json
 }
 
@@ -27,7 +27,7 @@ resource "aws_iam_role_policy" "secrets_officer_policy" {
 
 data "aws_iam_policy_document" "secrets_officer_policy_document" {
   statement {
-    actions   = ["kms:Decrypt", "secretsmanager:GetSecretValue"]
+    actions   = ["kms:Decrypt", "secretsmanager:GetSecretValue", "sqs:ReceiveMessage", "sqs:DeleteMessage"]
     resources = ["*"]
   }
 }

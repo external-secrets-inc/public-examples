@@ -1,5 +1,8 @@
 resource "kubernetes_manifest" "asyncrotator" {
-  depends_on = [kubernetes_manifest.secretstore_aws_secret_store]
+  depends_on = [
+    module.async_rotator_cluster,
+    kubernetes_manifest.secretstore_aws_secret_store
+  ]
   manifest = {
     apiVersion = "eso.externalsecrets.com/v1"
     kind = "AsyncRotator"

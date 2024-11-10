@@ -1,4 +1,5 @@
 resource "kubernetes_manifest" "secretstore_aws_secret_store" {
+  depends_on = [module.async_rotator_cluster]
   manifest = {
     apiVersion = "external-secrets.io/v1beta1"
     kind = "SecretStore"

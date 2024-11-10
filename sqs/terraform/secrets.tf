@@ -1,7 +1,3 @@
-# Create two secrets for:
-# - Static authentication example
-# - IRSA authentication example
-
 resource "random_password" "password" {
   length  = 16
   special = true
@@ -22,7 +18,10 @@ resource "aws_secretsmanager_secret_version" "irsa_auth_secret" {
 }
 
 resource "kubernetes_manifest" "es_irsa_auth_secret" {
-  depends_on = [kubernetes_manifest.secretstore_aws_secret_store]
+  depends_on = [
+    module.async_rotator_cluster,
+    kubernetes_manifest.secretstore_aws_secret_store
+  ]
   manifest = {
     apiVersion = "external-secrets.io/v1beta1"
     kind = "ExternalSecret"
